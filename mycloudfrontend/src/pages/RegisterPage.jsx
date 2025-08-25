@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = '/api'; // Используем относительный путь для корректной работы в продакшене
 
 const RegisterPage = () => {
   const [login, setLogin] = useState('');
@@ -10,7 +10,6 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // Регулярки для валидации
   const loginRe = /^[a-zA-Z][a-zA-Z0-9]{3,19}$/;
   const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRe = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{6,}$/;
@@ -32,7 +31,7 @@ const RegisterPage = () => {
       setError('Пароль — минимум 6 символов, 1 заглавная, 1 цифра, 1 спецсимвол.');
       return;
     }
-    if (!fullName) {
+    if (!fullName.trim()) {
       setError('Необходимо указать полное имя.');
       return;
     }
@@ -53,12 +52,10 @@ const RegisterPage = () => {
       console.log('Ответ сервера:', data);
 
       if (!response.ok) {
-        // Варианты возможных ошибок
         if (data.detail) {
           setError(data.detail);
         } else if (typeof data === 'object') {
-          // Вывод ошибок по полям
-          let messages = [];
+          const messages = [];
           for (const key in data) {
             if (Array.isArray(data[key])) {
               messages.push(`${key}: ${data[key].join(', ')}`);
@@ -86,16 +83,18 @@ const RegisterPage = () => {
   return (
     <div className="container">
       <h2>Регистрация</h2>
-      {success && <p style={{ color: 'green', fontWeight: 600, marginBottom: 8 }}>
-        Регистрация успешна! Теперь можно выполнить вход.
-      </p>}
+      {success && (
+        <p style={{ color: 'green', fontWeight: 600, marginBottom: 8 }}>
+          Регистрация успешна! Теперь можно выполнить вход.
+        </p>
+      )}
       <form onSubmit={handleSubmit} noValidate>
         <label>
           Логин:
           <input
             type="text"
             value={login}
-            onChange={e => setLogin(e.target.value)}
+            onChange={(e) => setLogin(e.target.value)}
             pattern="^[a-zA-Z][a-zA-Z0-9]{3,19}$"
             required
             title="Латинские буквы и цифры, первый символ — буква, 4–20 символов"
@@ -106,7 +105,7 @@ const RegisterPage = () => {
           <input
             type="text"
             value={fullName}
-            onChange={e => setFullName(e.target.value)}
+            onChange={(e) => setFullName(e.target.value)}
             required
           />
         </label>
@@ -115,7 +114,7 @@ const RegisterPage = () => {
           <input
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             required
             pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
             title="Введите корректный email"
@@ -126,7 +125,7 @@ const RegisterPage = () => {
           <input
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
             pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{6,}$"
             title="Мин. 6 символов, заглавная буква, цифра, спецсимвол"
@@ -134,7 +133,7 @@ const RegisterPage = () => {
         </label>
         <button type="submit">Зарегистрироваться</button>
       </form>
-      {error && <div className="error-message" style={{color: 'red', marginTop: '10px'}}>{error}</div>}
+      {error && <div className="error-message" style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
     </div>
   );
 };
