@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
-const API_BASE_URL = '/api'; // Используем относительный путь для корректной работы в продакшене
-
+const API_BASE_URL = '/api'; 
 const RegisterPage = () => {
   const [login, setLogin] = useState('');
   const [fullName, setFullName] = useState('');

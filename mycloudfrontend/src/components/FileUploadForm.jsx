@@ -16,7 +16,7 @@ const FileUploadForm = () => {
     e.preventDefault();
     if (!file) return;
     // Отправляем правильный URL с нужным параметром
-    dispatch(uploadFile({ file, comment, url: 'http://localhost:8000/api/files/upload/' }));
+    dispatch(uploadFile({ file, comment, url: '/api/files/upload/' }));
     setFile(null);
     setComment('');
     e.target.reset();

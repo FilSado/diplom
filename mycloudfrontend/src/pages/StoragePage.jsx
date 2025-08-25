@@ -22,7 +22,7 @@ const StoragePage = () => {
   const handleDownload = async (file) => {
     try {
       const tokens = JSON.parse(localStorage.getItem('tokens'));
-      const response = await fetch(`http://localhost:8000/api/files/${file.id}/download/`, {
+      const response = await fetch(`/api/files/${file.id}/download/`, {
         headers: {
           Authorization: `Bearer ${tokens.access}`,
         },

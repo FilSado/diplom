@@ -39,7 +39,7 @@ export const uploadFile = createAsyncThunk(
       formData.append('file', file);
       formData.append('comment', comment);
 
-      const response = await fetch('http://localhost:8000/api/files/upload/', {
+      const response = await fetch('/api/files/upload/', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${tokens.access}`,
@@ -65,7 +65,7 @@ export const updateFileComment = createAsyncThunk(
   async ({ fileId, comment }, { rejectWithValue }) => {
     try {
       const tokens = JSON.parse(localStorage.getItem('tokens'));
-      const response = await fetch(`http://localhost:8000/api/files/${fileId}/comment/`, {
+      const response = await fetch(`/api/files/${fileId}/comment/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
