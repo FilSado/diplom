@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import File
@@ -24,7 +23,7 @@ User = get_user_model()
 
 # ==== Регистрация ====
 class RegisterView(generics.CreateAPIView):
-    queryset = File.objects.none()  # фиктивный queryset
+    queryset = User.objects.all()
     permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
 
