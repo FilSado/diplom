@@ -1,4 +1,5 @@
 from django.urls import path
+from django.http import HttpResponse
 from .views import (
     FileListView,
     FileUploadView,
@@ -13,7 +14,12 @@ from .views import (
     AdminUserFilesView,
 )
 
+def api_home(request):
+    return HttpResponse("API root works")
+
+
 urlpatterns = [
+    path('', api_home, name='api_home'),
     # ==== Файлы пользователя ====
     path('files/', FileListView.as_view(), name='file-list'),
     path('files/upload/', FileUploadView.as_view(), name='file-upload'),

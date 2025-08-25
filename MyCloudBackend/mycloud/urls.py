@@ -9,6 +9,7 @@ from rest_framework_simplejwt.views import (
 from storage.views import RegisterView, LogoutView
 
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 

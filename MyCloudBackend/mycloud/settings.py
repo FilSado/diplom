@@ -27,8 +27,6 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'fallback-insecure-key')
 DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '83.166.245.17']
-
-
 # Application definition
 
 INSTALLED_APPS = [
