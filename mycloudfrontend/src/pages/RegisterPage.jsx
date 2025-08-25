@@ -41,12 +41,13 @@ const RegisterPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: login,
-          full_name: fullName,
-          email,
-          password,
+          username: login,       // ключ username, значение из переменной login
+          full_name: fullName,   // ключ full_name, значение из переменной fullName
+          email: email,          // ключ email, значение из переменной email
+          password: password,    // ключ password, значение из переменной password
         }),
       });
+
 
       const data = await response.json();
       console.log('Ответ сервера:', data);
