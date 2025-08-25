@@ -72,6 +72,10 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+CORS_ALLOWED_ORIGINS = [
+    "http://83.166.245.17",
+]
+
 # Логирование
 LOGGING = {
     'version': 1,
