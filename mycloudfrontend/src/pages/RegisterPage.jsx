@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const API_BASE_URL = '/api'; 
+const API_BASE_URL = 'http://83.166.245.17/api'; 
 const RegisterPage = () => {
   const [login, setLogin] = useState('');
   const [fullName, setFullName] = useState('');
