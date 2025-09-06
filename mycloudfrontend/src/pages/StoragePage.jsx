@@ -4,6 +4,8 @@ import { fetchFiles, deleteFile, updateFileComment } from '../store/filesSlice';
 import FileUploadForm from '../components/FileUploadForm';
 import FileItem from '../components/FileItem';
 
+const API_BASE_URL = 'http://83.166.245.17';
+
 const StoragePage = () => {
   const dispatch = useDispatch();
   const { files, loading, error } = useSelector(state => state.files);
@@ -22,7 +24,7 @@ const StoragePage = () => {
   const handleDownload = async (file) => {
     try {
       const tokens = JSON.parse(localStorage.getItem('tokens'));
-      const response = await fetch(`/api/files/${file.id}/download/`, {
+      const response = await fetch(`${API_BASE_URL}/api/files/${file.id}/download/`, {
         headers: {
           Authorization: `Bearer ${tokens.access}`,
         },
@@ -45,12 +47,24 @@ const StoragePage = () => {
     }
   };
 
-  // Функция для копирования публичной ссылки на файл
-  const handleCopyLink = (file) => {
-    const publicUrl = file.public_url || `${window.location.origin}/api/files/public/${file.public_link}/`;
-    navigator.clipboard.writeText(publicUrl);
-    alert('Ссылка скопирована!');
-  };
+  // Функция для копирования публичной ссылки на файл с проверкой Clipboard API
+const handleCopyLink = (file) => {
+  const publicUrl = file.public_url || `${window.location.origin}/api/files/public/${file.public_link}/`;
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.clipboard &&
+    typeof navigator.clipboard.writeText === "function"
+  ) {
+    navigator.clipboard.writeText(publicUrl)
+      .then(() => alert('Ссылка скопирована!'))
+      .catch(() => alert('Не удалось скопировать ссылку'));
+  } else {
+    // Фолбэк для небезопасных соединений (HTTP), покажет окно для ручного копирования
+    window.prompt('Скопируйте ссылку вручную:', publicUrl);
+  }
+};
+
+
 
   // Функция для обновления комментария
   const handleUpdateComment = (fileId, comment) => {
