@@ -1,122 +1,225 @@
-# MyCloudBackend
+# 🐍 MyCloud Backend - Django REST API
 
-## Описание
+## 📋 Описание
+Backend часть облачного хранилища My Cloud на Django 5.2 + DRF с Docker деплоем.
 
-Облачное хранилище с регистрацией пользователей, загрузкой и управлением файлами через REST API.
+## 🛠 Технологический стек
+- Django 5.2, Django REST Framework  
+- PostgreSQL 15+, JWT Authentication
+- Docker + Docker Compose
+- Nginx, Gunicorn
+- pytest для тестирования
 
-## Структура проекта
+## 📡 Подробная инструкция деплоя на REG.RU
 
-- `mycloud/` — основной модуль Django с настройками и URL-ами
-- `storage/` — приложение для работы с файловым хранилищем и пользователями:
-  - `models.py` — модели данных (User, File)
-  - `views.py` — API views для регистрации, авторизации, работы с файлами и админкой
-  - `serializers.py` — сериализаторы для работы с JSON
-  - `urls.py` — маршруты API
-- `media/` — директория для сохранения загруженных файлов
-- `requirements.txt` — зависимости проекта
+### 1️⃣ Настройка PostgreSQL
 
-## Требования
+Установка PostgreSQL
+sudo apt update
+sudo apt install postgresql postgresql-contrib
 
-- Python >= 3.10
-- Django >= 3.2
-- djangorestframework
-- djangorestframework-simplejwt
-- PostgreSQL
+Создание базы данных
+sudo -u postgres psql
 
-## Установка и запуск
+text
+undefined
+CREATE DATABASE mycloud_production;
+CREATE USER mycloud_user WITH PASSWORD 'NewStrongPassword123';
+GRANT ALL PRIVILEGES ON DATABASE mycloud_production TO mycloud_user;
+ALTER USER mycloud_user CREATEDB;
+\q
 
-1. Клонировать репозиторий:
+text
 
-git clone <ссылка-на-репозиторий>
-cd mycloudbackend
+### 2️⃣ Установка Docker
 
+Установка Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
 
-2. Создать и активировать виртуальное окружение:
+Установка Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
-python -m venv venv
-source venv/bin/activate # Linux/Mac
-venv\Scripts\activate # Windows
+Проверка установки
+docker --version
+docker-compose --version
 
+text
 
-3. Установить зависимости:
+### 3️⃣ Подготовка проекта
 
-pip install -r requirements.txt
+Создание директорий
+sudo mkdir -p /opt/mycloud
+sudo chown -R $USER:$USER /opt/mycloud
+cd /opt/mycloud
 
+Копирование React build
+cp -r mycloudfrontend/build MyCloudBackend/frontend_build
 
+Создание необходимых директорий
+mkdir -p MyCloudBackend/{logs,ssl,media,staticfiles}
 
-4. Настроить базу данных в `settings.py`:
+text
 
-DATABASES = {
-'default': {
-'ENGINE': 'django.db.backends.postgresql',
-'NAME': 'myclouddb',
-'USER': 'myuser',
-'PASSWORD': 'mypassword',
-'HOST': 'localhost',
-'PORT': '5432',
-}
-}
+### 4️⃣ Настройка .env файла
 
+nano MyCloudBackend/.env
 
+text
+undefined
+Django Core Settings
+SECRET_KEY=django-insecure-change-this-in-production-50-chars-minimum
+DEBUG=False
+ALLOWED_HOSTS=localhost,127.0.0.1,83.166.245.17
 
-5. Выполнить миграции и создать суперпользователя:
+Database Settings
+DB_NAME=mycloud_production
+DB_USER=mycloud_user
+DB_PASSWORD=NewStrongPassword123
+DB_HOST=db
+DB_PORT=5432
 
+CORS Settings
+CORS_ALLOWED_ORIGINS=http://83.166.245.17,https://83.166.245.17
+CORS_ALLOW_CREDENTIALS=True
 
-python manage.py migrate
-python manage.py createsuperuser
+Static Files
+STATIC_URL=/static/
+MEDIA_URL=/media/
+STATIC_ROOT=/app/staticfiles
+MEDIA_ROOT=/app/media
 
+Security Settings
+SECURE_BROWSER_XSS_FILTER=True
+SECURE_CONTENT_TYPE_NOSNIFF=True
+X_FRAME_OPTIONS=DENY
 
+text
 
-6. Запустить сервер:
+**Генерация SECRET_KEY:**
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 
+text
 
-python manage.py runserver
+### 5️⃣ Запуск Docker
 
+cd /opt/mycloud/MyCloudBackend
 
+Сборка и запуск
+docker-compose build --no-cache
+docker-compose up -d
 
-## API
+Проверка статуса
+docker-compose ps
 
-- Регистрация: `POST /api/register/`  
-- Авторизация: `POST /api/token/`, `POST /api/token/refresh/` (JWT)  
-- Логаут: `POST /api/logout/`
+text
 
-### Работа с файлами (требуется авторизация):
+### 6️⃣ Настройка Django
 
-- `GET /api/files/` — список файлов пользователя  
-- `POST /api/files/upload/` — загрузка файла  
-- `PATCH /api/files/<id>/comment/` — редактирование комментария  
-- `PATCH /api/files/<id>/rename/` — переименование файла  
-- `DELETE /api/files/<id>/` — удаление файла  
-- `GET /api/files/<id>/download/` — скачивание файла  
-- `GET /api/files/download/public/<public_link>/` — скачивание по публичной ссылке
+Миграции
+docker-compose exec web python manage.py migrate
 
-### Администрирование (только для админов):
+Создание суперпользователя
+docker-compose exec web python manage.py createsuperuser
 
-- `GET /api/users/` — список пользователей  
-- `PATCH /api/users/<id>/` — редактирование пользователя  
-- `DELETE /api/users/<id>/delete/` — удаление пользователя
+Сбор статических файлов
+docker-compose exec web python manage.py collectstatic --noinput
 
-## Логирование
+Создание демо пользователей
+docker-compose exec web python manage.py shell -c "
+from django.contrib.auth.models import User;
+User.objects.create_user('demo', 'demo@example.com', 'DemoPass123!');
+User.objects.create_user('testuser', 'test@example.com', 'TestPass123!');
+print('Demo users created')
+"
 
-Все действия логируются в консоль с указанием времени и пользователя.
+text
 
-## Тестирование
+## 🔧 Управление
 
-Запуск тестов:
+### Основные команды:
 
-python manage.py test
+Просмотр логов
+docker-compose logs -f web
+docker-compose logs -f nginx
+docker-compose logs -f db
 
+Перезапуск сервисов
+docker-compose restart web
+docker-compose restart nginx
 
+Остановка всех сервисов
+docker-compose down
 
-## Развёртывание
+text
 
-Инструкции по развёртыванию на reg.ru или VPS требует настройки Nginx, Gunicorn и базы данных.
+### Резервное копирование:
 
----
+Бэкап БД
+docker-compose exec db pg_dump -U mycloud_user mycloud_production > backup_$(date +%Y%m%d_%H%M%S).sql
 
-# Контакты
+Бэкап файлов
+tar -czf media_backup_$(date +%Y%m%d_%H%M%S).tar.gz media/
 
-evgenia.sadovnikova@mail.ru
+text
 
+## 🧪 Тестирование
 
+Запуск тестов
+docker-compose exec web pytest
 
+Тесты с покрытием
+docker-compose exec web pytest --cov=mycloud
+
+Проверка безопасности
+docker-compose exec web python manage.py check --deploy
+
+text
+
+## 🛠️ Troubleshooting
+
+### Проблема: Сайт недоступен
+Проверка статуса
+docker-compose ps
+
+Проверка логов
+docker-compose logs nginx | tail -50
+
+Проверка портов
+sudo netstat -tlnp | grep :80
+
+text
+
+### Проблема: Ошибки базы данных
+Проверка подключения к БД
+docker-compose exec web python manage.py check --database default
+
+Логи PostgreSQL
+docker-compose logs db | tail -50
+
+text
+
+### Проблема: Статические файлы не загружаются
+Пересборка статики
+docker-compose exec web python manage.py collectstatic --noinput -v 2
+
+Проверка Nginx конфигурации
+docker-compose exec nginx nginx -t
+docker-compose restart nginx
+
+text
+
+## 🎯 API Endpoints
+
+- **Авторизация:** `/api/auth/login/`, `/api/auth/register/`
+- **Файлы:** `/api/files/`, `/api/files/upload/`
+- **Пользователи:** `/api/users/`
+- **Админка:** `/admin/`
+
+## 📞 Поддержка
+
+**Email:** evgenia.sadovnikova@mail.ru  
+**Документация Django:** https://docs.djangoproject.com/  
+**Docker документация:** https://docs.docker.com/

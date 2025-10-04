@@ -1,0 +1,363 @@
+/* Импортируем переменные */
+@import './variables.css';
+
+/* Базовые стили */
+.App {
+  text-align: left;
+  min-height: 100vh;
+}
+
+/* Navbar стили */
+.navbar {
+  box-shadow: var(--box-shadow);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-navbar);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--content-padding);
+  height: 100%;
+}
+
+.navbar-brand a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+  transition: var(--transition);
+}
+
+.navbar-brand a:hover {
+  color: var(--primary-hover);
+  transform: scale(1.05);
+}
+
+.user-dropdown {
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.user-dropdown:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* FileUpload стили */
+.file-upload-form {
+  margin-bottom: 2rem;
+}
+
+.file-upload-form .ant-upload-drag {
+  transition: var(--transition);
+  border-radius: var(--border-radius-lg);
+  background: var(--bg-color-light);
+}
+
+.file-upload-form .ant-upload-drag:hover {
+  border-color: var(--primary-hover);
+}
+
+.file-upload-form .drag-active {
+  border-color: var(--primary-color) !important;
+  background-color: #f0f8ff !important;
+  transform: scale(1.02);
+}
+
+/* FileItem стили */
+.file-item-row {
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.file-item-row:hover {
+  background-color: var(--bg-color-hover);
+}
+
+.file-item-mobile {
+  transition: var(--transition);
+  margin-bottom: var(--content-padding-sm);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+.file-item-mobile:hover {
+  box-shadow: var(--box-shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* Таблица файлов */
+.file-table-wrapper {
+  background: var(--bg-color);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+.file-table-wrapper .ant-table-thead > tr > th {
+  background: var(--bg-color-light);
+  font-weight: 600;
+  color: var(--text-color);
+  border-bottom: 2px solid var(--border-color-split);
+}
+
+.file-table-wrapper .ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--border-color-split);
+  padding: 16px;
+}
+
+/* Responsive таблица */
+@media (max-width: 768px) {
+  .file-table-wrapper {
+    overflow-x: auto;
+    margin: var(--content-padding-sm);
+  }
+  
+  .file-table-wrapper table {
+    min-width: 600px;
+  }
+  
+  .navbar-container {
+    padding: 0 var(--content-padding-sm);
+  }
+  
+  .file-upload-form {
+    margin: var(--content-padding-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 0 var(--content-padding-xs);
+  }
+  
+  .file-upload-form {
+    margin: var(--content-padding-xs);
+  }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.file-item-row,
+.file-item-mobile {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.ant-drawer .ant-drawer-content {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Accessibility улучшения */
+.navbar [role="navigation"] {
+  outline: none;
+}
+
+.navbar button:focus,
+.navbar .ant-menu-item:focus,
+.ant-btn:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.file-item-row:focus-within,
+.file-item-mobile:focus-within {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Улучшения для screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Loading стили */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  flex-direction: column;
+}
+
+.loading-spinner .ant-spin {
+  margin-bottom: var(--content-padding-sm);
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+/* Error стили */
+.error-boundary {
+  padding: 40px;
+  text-align: center;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: var(--border-radius);
+  margin: var(--content-padding);
+}
+
+.error-message {
+  color: var(--error-color);
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: var(--border-radius);
+  padding: 12px 16px;
+  margin: 8px 0;
+}
+
+/* Улучшения для Ant Design компонентов */
+.ant-upload-dragger {
+  background: var(--bg-color-light) !important;
+  transition: var(--transition);
+}
+
+.ant-upload-dragger:hover {
+  border-color: var(--primary-hover) !important;
+}
+
+.ant-message {
+  top: 100px !important;
+}
+
+.ant-modal-confirm .ant-modal-body {
+  padding: 32px 32px 24px;
+}
+
+.ant-drawer-header {
+  background: var(--bg-color-light);
+  border-bottom: 1px solid var(--border-color-split);
+}
+
+/* Кастомные утилиты */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+
+.p-8 { padding: 8px; }
+.p-16 { padding: 16px; }
+.p-24 { padding: 24px; }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+
+/* Состояния кнопок */
+.btn-loading {
+  animation: pulse 2s infinite;
+}
+
+/* Print стили */
+@media print {
+  .navbar,
+  .ant-affix,
+  .ant-back-top,
+  .ant-drawer {
+    display: none !important;
+  }
+  
+  .file-item-mobile,
+  .file-item-row {
+    animation: none;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .file-upload-form {
+    display: none !important;
+  }
+}
+
+/* Темная тема стили */
+@media (prefers-color-scheme: dark) {
+  .file-item-row:hover {
+    background-color: var(--bg-color-hover);
+  }
+  
+  .error-boundary {
+    background-color: #2c1810;
+    border-color: #8c2f00;
+    color: var(--text-color);
+  }
+  
+  .error-message {
+    background-color: #2c1810;
+    border-color: #8c2f00;
+    color: #ff7a45;
+  }
+}

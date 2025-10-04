@@ -1,111 +1,135 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchFiles, deleteFile, updateFileComment } from '../store/filesSlice';
+import {
+  fetchFiles,
+  deleteFile,
+  updateFileComment,
+  renameFile
+} from '../store/filesSlice';
 import FileUploadForm from '../components/FileUploadForm';
 import FileItem from '../components/FileItem';
+import { Spin, Alert, Empty } from 'antd';
+import { useIsMobile } from '../hooks/useIsMobile';
+import { downloadFileApi, copyFileLinkApi } from '../utils/api';
 
-const API_BASE_URL = 'http://83.166.245.17';
-
-const StoragePage = () => {
+export default function StoragePage() {
   const dispatch = useDispatch();
-  const { files, loading, error } = useSelector(state => state.files);
+  const { files, loading, error, loadingIds } = useSelector(state => state.files);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     dispatch(fetchFiles());
   }, [dispatch]);
 
-  const handleDelete = (id) => {
-    if (window.confirm('Удалить файл?')) {
-      dispatch(deleteFile(id));
-    }
+  const handleDelete = id => {
+    dispatch(deleteFile(id));
   };
 
-  // Функция для скачивания файла с авторизацией
-  const handleDownload = async (file) => {
+  const handleUpdateComment = (fileId, comment) => {
+    dispatch(updateFileComment({ fileId, comment }));
+  };
+
+  const handleRename = (fileId, newName) => {
+    dispatch(renameFile({ fileId, newName }));
+  };
+
+  const handleDownload = async file => {
     try {
-      const tokens = JSON.parse(localStorage.getItem('tokens'));
-      const response = await fetch(`${API_BASE_URL}/api/files/${file.id}/download/`, {
-        headers: {
-          Authorization: `Bearer ${tokens.access}`,
-        },
-      });
-      if (!response.ok) {
-        alert('Ошибка загрузки файла');
-        return;
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const blob = await downloadFileApi(file.id);
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = file.original_name;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
       a.remove();
-    } catch (error) {
-      alert('Ошибка при скачивании файла');
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download error:', err);
     }
   };
 
-  // Функция для копирования публичной ссылки на файл с проверкой Clipboard API
-const handleCopyLink = (file) => {
-  const publicUrl = file.public_url || `${window.location.origin}/api/files/public/${file.public_link}/`;
-  if (
-    typeof navigator !== "undefined" &&
-    navigator.clipboard &&
-    typeof navigator.clipboard.writeText === "function"
-  ) {
-    navigator.clipboard.writeText(publicUrl)
-      .then(() => alert('Ссылка скопирована!'))
-      .catch(() => alert('Не удалось скопировать ссылку'));
-  } else {
-    // Фолбэк для небезопасных соединений (HTTP), покажет окно для ручного копирования
-    window.prompt('Скопируйте ссылку вручную:', publicUrl);
-  }
-};
-
-
-
-  // Функция для обновления комментария
-  const handleUpdateComment = (fileId, comment) => {
-    dispatch(updateFileComment({ fileId, comment }));
+  const handleCopyLink = async file => {
+    try {
+      const response = await copyFileLinkApi(file.id);
+      const link = response.public_url || response.link;
+      await navigator.clipboard.writeText(link);
+    } catch (err) {
+      console.error('Copy link error:', err);
+    }
   };
 
   return (
-    <div className="container">
+    <div style={{ padding: 24 }}>
       <h2>Ваше файловое хранилище</h2>
+
       <FileUploadForm />
-      {loading && <p>Загрузка файлов...</p>}
-      {error && <p className="error-message">{error}</p>}
-      {files.length === 0 && !loading ? (
-        <p>Файлы не найдены.</p>
-      ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th>Имя файла</th>
-              <th>Комментарий</th>
-              <th>Размер</th>
-              <th>Дата загрузки</th>
-              <th>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {files.map(file => (
-              <FileItem
-                key={file.id}
-                file={file}
-                onDelete={handleDelete}
-                onDownload={() => handleDownload(file)}
-                onCopyLink={() => handleCopyLink(file)}
-                onUpdateComment={handleUpdateComment}
-              />
-            ))}
-          </tbody>
-        </table>
+
+      {loading && (
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <Spin size="large" tip="Загрузка файлов..." />
+        </div>
+      )}
+
+      {error && (
+        <Alert
+          type="error"
+          message="Ошибка при загрузке файлов"
+          description={error}
+          showIcon
+          style={{ margin: '16px 0' }}
+        />
+      )}
+
+      {!loading && files.length === 0 && (
+        <Empty
+          description="Файлы не найдены"
+          style={{ margin: '40px 0' }}
+        />
+      )}
+
+      {!loading && files.length > 0 && (
+        isMobile ? (
+          files.map(file => (
+            <FileItem
+              key={file.id}
+              file={file}
+              isMobile
+              loading={loadingIds.includes(file.id)}
+              onDelete={handleDelete}
+              onDownload={handleDownload}
+              onCopyLink={handleCopyLink}
+              onUpdateComment={handleUpdateComment}
+              onRename={handleRename}
+            />
+          ))
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 16 }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #f0f0f0' }}>Файл</th>
+                <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #f0f0f0' }}>Комментарий</th>
+                <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #f0f0f0' }}>Дата</th>
+                <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #f0f0f0' }}>Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              {files.map(file => (
+                <FileItem
+                  key={file.id}
+                  file={file}
+                  loading={loadingIds.includes(file.id)}
+                  onDelete={handleDelete}
+                  onDownload={handleDownload}
+                  onCopyLink={handleCopyLink}
+                  onUpdateComment={handleUpdateComment}
+                  onRename={handleRename}
+                />
+              ))}
+            </tbody>
+          </table>
+        )
       )}
     </div>
   );
-};
-
-export default StoragePage;
+}

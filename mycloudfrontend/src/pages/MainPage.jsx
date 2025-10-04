@@ -1,10 +1,13 @@
 import React from 'react';
+import { Typography } from 'antd';
 
-const MainPage = () => (
-  <div className="container">
-    <h1>Облачное хранилище My Cloud</h1>
-    <p>Добро пожаловать! Используйте меню для входа или регистрации.</p>
-  </div>
-);
+const { Title, Paragraph } = Typography;
 
-export default MainPage;
+export default function MainPage() {
+  return (
+    <div style={{ padding: 24, textAlign: 'center' }}>
+      <Title>Облачное хранилище My Cloud</Title>
+      <Paragraph>Добро пожаловать! Войдите или зарегистрируйтесь в меню.</Paragraph>
+    </div>
+  );
+}

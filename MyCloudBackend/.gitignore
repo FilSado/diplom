@@ -18,17 +18,22 @@ static/
 
 db.sqlite3
 
-# VSCode
-.vscode/
-.history/
+# === SECRETS (ВАЖНО!) ===
+.env
+*.env
+!.env.example
 
-# MacOS
-.DS_Store
+# === DOCKER & DEPLOYMENT ===
+# Не игнорируем Docker файлы - они нужны для деплоя!
+# !Dockerfile
+# !docker-compose.yml
+# !nginx.conf
+# !deploy.sh
 
-# pytest, coverage
-htmlcov/
-.coverage
-.cache
+# Игнорируем только build артефакты
+MyCloudBackend/frontend_build/
+MyCloudBackend/logs/
+MyCloudBackend/ssl/
 
 # === NODE/REACT (Frontend) ===
 node_modules/
@@ -38,8 +43,8 @@ yarn-error.log*
 /build
 /.env
 
-# Build output
-build/
+# Build output (только React build в frontend папке)
+mycloudfrontend/build/
 *.tgz
 
 # NPM logs
@@ -51,15 +56,36 @@ build/
 .env.test.local
 .env.production.local
 
-# === GENERAL ===
-*.bak
-*.swp
-*~
+# === IDE ===
+# VSCode
+.vscode/
+.history/
+
+# PyCharm
 .idea/
 *.iml
 
+# === OS ===
 # Windows
 Thumbs.db
 ehthumbs.db
 Icon?
 Desktop.ini
+
+# MacOS
+.DS_Store
+
+# === TESTING ===
+htmlcov/
+.coverage
+.cache
+.pytest_cache/
+
+# === GENERAL ===
+*.bak
+*.swp
+*~
+
+# === DOCUMENTATION (НЕ ИГНОРИРУЕМ!) ===
+# !README.md
+# !*.md

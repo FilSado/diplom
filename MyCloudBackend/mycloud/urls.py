@@ -1,31 +1,21 @@
+from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
-from storage.views import RegisterView, LogoutView
-
-
+from django.urls import path, include, re_path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    # JWT авторизация
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
-    # Регистрация пользователя
-    path('api/register/', RegisterView.as_view(), name='register'),
-
-    # Logout
-    path('api/logout/', LogoutView.as_view(), name='auth_logout'),
-
-    # Остальные роуты из приложения storage (файлы/пользователи/админ‑функции)
+    
+    # Все API маршруты идут через storage.urls
     path('api/', include('storage.urls')),
 ]
 
+# Поддержка static и media в DEBUG
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# SPA fallback для React приложения
+urlpatterns += [
+    re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name='index.html')),
+]

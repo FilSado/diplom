@@ -1,6 +1,10 @@
 from django.contrib.auth.models import User
 from django.db import models
 import uuid
+import mimetypes
+from django.conf import settings
+import os
+
 
 class File(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -18,10 +22,23 @@ class File(models.Model):
     )
     file_path = models.CharField(max_length=255)
 
+    # Дополнительные поля согласно требованиям
+    mime_type = models.CharField(max_length=100, blank=True)
+    download_count = models.IntegerField(default=0)
+    is_public = models.BooleanField(default=False)
+
     def save(self, *args, **kwargs):
         if not self.public_link:
             self.public_link = uuid.uuid4().hex
+        if not self.mime_type and self.original_name:
+            self.mime_type, _ = mimetypes.guess_type(self.original_name)
         super().save(*args, **kwargs)
+
+    def get_file_path(self):
+        return os.path.join(settings.MEDIA_ROOT, self.file_path)
+
+    def get_public_url(self):
+        return f"/api/files/public/{self.public_link}/"
 
     def __str__(self):
         return f"{self.original_name} ({self.user.username})"

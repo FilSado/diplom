@@ -6,8 +6,8 @@ export const fetchUsers = createAsyncThunk(
   'users/fetchUsers',
   async (_, { rejectWithValue }) => {
     try {
-      const data = await authorizedFetch('/users/');
-      return data;
+      const data = await authorizedFetch('/admin/users/');
+      return Array.isArray(data) ? data : data.users || [];
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -19,7 +19,7 @@ export const deleteUser = createAsyncThunk(
   'users/deleteUser',
   async (userId, { rejectWithValue }) => {
     try {
-      await authorizedFetch(`/users/${userId}/`, { method: 'DELETE' });
+      await authorizedFetch(`/admin/users/${userId}/delete/`, { method: 'DELETE' });
       return userId;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -27,16 +27,17 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
-// Переключить признак администратора
+// Переключить права администратора
 export const toggleAdmin = createAsyncThunk(
   'users/toggleAdmin',
-  async ({ id, isAdmin }, { rejectWithValue }) => {
+  async ({ id, isStaff }, { rejectWithValue }) => {
     try {
-      const response = await authorizedFetch(`/users/${id}/`, {
+      const updated = await authorizedFetch(`/admin/users/${id}/`, {
         method: 'PATCH',
-        body: JSON.stringify({ is_admin: isAdmin }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_staff: isStaff }),
       });
-      return response;
+      return { id, isStaff: updated.is_staff };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -45,38 +46,24 @@ export const toggleAdmin = createAsyncThunk(
 
 const usersSlice = createSlice({
   name: 'users',
-  initialState: {
-    users: [],
-    loading: false,
-    error: null,
-  },
+  initialState: { list: [], loading: false, error: null },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchUsers.pending, state => {
-        state.loading = true;
-        state.error = null;
-      })
+      .addCase(fetchUsers.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.users = action.payload;
+        state.list = action.payload;
         state.loading = false;
       })
-      .addCase(fetchUsers.rejected, (state, action) => {
-        state.error = action.payload;
-        state.loading = false;
-      })
+      .addCase(fetchUsers.rejected, (state, action) => { state.error = action.payload; state.loading = false; })
+
       .addCase(deleteUser.fulfilled, (state, action) => {
-        state.users = state.users.filter(u => u.id !== action.payload);
+        state.list = state.list.filter((u) => u.id !== action.payload);
       })
-      .addCase(deleteUser.rejected, (state, action) => {
-        state.error = action.payload;
-      })
+
       .addCase(toggleAdmin.fulfilled, (state, action) => {
-        const index = state.users.findIndex(u => u.id === action.payload.id);
-        if (index !== -1) state.users[index].is_admin = action.payload.is_admin;
-      })
-      .addCase(toggleAdmin.rejected, (state, action) => {
-        state.error = action.payload;
+        const user = state.list.find((u) => u.id === action.payload.id);
+        if (user) user.is_staff = action.payload.isStaff;
       });
   },
 });
