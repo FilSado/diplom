@@ -23,12 +23,6 @@ db.sqlite3
 *.env
 !.env.example
 
-# === DOCKER & DEPLOYMENT ===
-# Не игнорируем Docker файлы - они нужны для деплоя!
-# !Dockerfile
-# !docker-compose.yml
-# !nginx.conf
-# !deploy.sh
 
 # Игнорируем только build артефакты
 MyCloudBackend/frontend_build/
