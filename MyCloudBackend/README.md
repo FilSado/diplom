@@ -21,15 +21,14 @@ sudo apt install postgresql postgresql-contrib
 Создание базы данных
 sudo -u postgres psql
 
-text
-undefined
+
 CREATE DATABASE mycloud_production;
 CREATE USER mycloud_user WITH PASSWORD 'NewStrongPassword123';
 GRANT ALL PRIVILEGES ON DATABASE mycloud_production TO mycloud_user;
 ALTER USER mycloud_user CREATEDB;
 \q
 
-text
+
 
 ### 2️⃣ Установка Docker
 
@@ -46,7 +45,6 @@ sudo chmod +x /usr/local/bin/docker-compose
 docker --version
 docker-compose --version
 
-text
 
 ### 3️⃣ Подготовка проекта
 
@@ -61,14 +59,12 @@ cp -r mycloudfrontend/build MyCloudBackend/frontend_build
 Создание необходимых директорий
 mkdir -p MyCloudBackend/{logs,ssl,media,staticfiles}
 
-text
+
 
 ### 4️⃣ Настройка .env файла
 
 nano MyCloudBackend/.env
 
-text
-undefined
 Django Core Settings
 SECRET_KEY=django-insecure-change-this-in-production-50-chars-minimum
 DEBUG=False
@@ -78,11 +74,11 @@ Database Settings
 DB_NAME=mycloud_production
 DB_USER=mycloud_user
 DB_PASSWORD=NewStrongPassword123
-DB_HOST=db
+DB_HOST=localhost
 DB_PORT=5432
 
 CORS Settings
-CORS_ALLOWED_ORIGINS=http://83.166.245.17,https://83.166.245.17
+CORS_ALLOWED_ORIGINS=http://83.166.245.17
 CORS_ALLOW_CREDENTIALS=True
 
 Static Files
@@ -96,12 +92,12 @@ SECURE_BROWSER_XSS_FILTER=True
 SECURE_CONTENT_TYPE_NOSNIFF=True
 X_FRAME_OPTIONS=DENY
 
-text
+
 
 **Генерация SECRET_KEY:**
-python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+python -c "from django.core.management.utils import get_random_secret_key; 
+print(get_random_secret_key())"
 
-text
 
 ### 5️⃣ Запуск Docker
 
@@ -114,7 +110,7 @@ docker-compose up -d
 Проверка статуса
 docker-compose ps
 
-text
+
 
 ### 6️⃣ Настройка Django
 
@@ -135,7 +131,7 @@ User.objects.create_user('testuser', 'test@example.com', 'TestPass123!');
 print('Demo users created')
 "
 
-text
+
 
 ## 🔧 Управление
 
@@ -153,7 +149,7 @@ docker-compose restart nginx
 Остановка всех сервисов
 docker-compose down
 
-text
+
 
 ### Резервное копирование:
 
@@ -163,7 +159,7 @@ docker-compose exec db pg_dump -U mycloud_user mycloud_production > backup_$(dat
 Бэкап файлов
 tar -czf media_backup_$(date +%Y%m%d_%H%M%S).tar.gz media/
 
-text
+
 
 ## 🧪 Тестирование
 
@@ -176,7 +172,7 @@ docker-compose exec web pytest --cov=mycloud
 Проверка безопасности
 docker-compose exec web python manage.py check --deploy
 
-text
+
 
 ## 🛠️ Troubleshooting
 
@@ -190,7 +186,7 @@ docker-compose logs nginx | tail -50
 Проверка портов
 sudo netstat -tlnp | grep :80
 
-text
+
 
 ### Проблема: Ошибки базы данных
 Проверка подключения к БД
@@ -199,7 +195,7 @@ docker-compose exec web python manage.py check --database default
 Логи PostgreSQL
 docker-compose logs db | tail -50
 
-text
+
 
 ### Проблема: Статические файлы не загружаются
 Пересборка статики
@@ -209,7 +205,7 @@ docker-compose exec web python manage.py collectstatic --noinput -v 2
 docker-compose exec nginx nginx -t
 docker-compose restart nginx
 
-text
+
 
 ## 🎯 API Endpoints
 

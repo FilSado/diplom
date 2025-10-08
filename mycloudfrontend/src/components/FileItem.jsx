@@ -1,4 +1,3 @@
-// src/components/FileItem.jsx
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { hasAccess } from '../utils/auth';
@@ -64,14 +63,12 @@ export default function FileItem({
   };
 
   const handleCopyLink = () => {
-    if (file.public_url) {
-      navigator.clipboard.writeText(file.public_url)
-        .then(() => message.success('Ссылка скопирована'))
-        .catch(() => message.error('Ошибка при копировании ссылки'));
+    if (onCopyLink) {
+      onCopyLink(file);
     } else {
-      message.error('Публичная ссылка недоступна');
+      message.error('Функция копирования недоступна');
     }
-  };
+};
 
   const handleDownloadClick = () => onDownload(file);
 

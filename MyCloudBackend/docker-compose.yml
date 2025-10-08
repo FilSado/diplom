@@ -12,6 +12,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - mycloud_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mycloud_user -d mycloud_production"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   web:
     build: .
@@ -22,11 +28,23 @@ services:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
       - ./logs:/app/logs
-      - ./frontend_build:/app/frontend_build  # ДОБАВЛЕНО: монтируем frontend_build
+      - ./uploads:/app/uploads
+      - ./storage:/app/storage
+      - ./frontend_build:/app/frontend_build
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - mycloud_network
+    command: >
+      sh -c "
+        echo '🔄 Waiting for database...' &&
+        python manage.py migrate --noinput &&
+        echo '📁 Collecting static files...' &&
+        python manage.py collectstatic --noinput &&
+        echo '🚀 Starting Gunicorn...' &&
+        gunicorn mycloud.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 300 --access-logfile - --error-logfile -
+      "
 
   nginx:
     image: nginx:alpine
@@ -38,7 +56,9 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - static_volume:/app/staticfiles:ro
       - media_volume:/app/media:ro
-      - ./frontend_build:/app/frontend_build:ro  # ДОБАВЛЕНО: монтируем frontend_build для Nginx
+      - ./frontend_build:/app/frontend_build:ro
+      - ./uploads:/app/uploads:ro
+      - ./storage:/app/storage:ro
     depends_on:
       - web
     networks:

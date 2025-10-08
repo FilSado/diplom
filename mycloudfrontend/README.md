@@ -17,25 +17,22 @@
 cd mycloudfrontend
 npm install
 
-text
+
 
 ### Настройка .env:
 
 cp .env.example .env
 
-text
-undefined
+
 REACT_APP_API_URL=http://127.0.0.1:8000/api
 REACT_APP_MEDIA_URL=http://127.0.0.1:8000/media
 GENERATE_SOURCEMAP=false
 
-text
 
 ### Запуск в режиме разработки:
 
 npm start
 
-text
 
 Откроется http://localhost:3000
 
@@ -47,9 +44,7 @@ Development build
 npm run build
 
 Для production с API на REG.RU:
-REACT_APP_API_URL=http://83.166.245.17:8000/api npm run build
-
-text
+REACT_APP_API_URL=http://83.166.245.17/api npm run build
 
 ### Проверка сборки:
 
@@ -59,7 +54,19 @@ npm run analyze
 Локальный сервер для тестирования build
 npx serve -s build -l 3000
 
-text
+### ✅ Интеграция с Django:
+
+После сборки React приложения:
+1. Скопировать build в Django проект
+cp -r build ../MyCloudBackend/frontend_build
+
+2. На сервере установить права
+chmod -R 755 /opt/diplom/MyCloudBackend/frontend_build
+
+3. Перезапустить Nginx
+docker-compose restart nginx
+
+**Результат:** React приложение будет доступно на http://83.166.245.17
 
 ## 🧪 Тестирование
 
@@ -75,7 +82,6 @@ npm run test:coverage
 npm test -- --testPathPattern=Login
 npm test -- --testPathPattern=FileUpload
 
-text
 
 ### Линтинг:
 
@@ -116,7 +122,6 @@ headers: {
 },
 });
 
-text
 
 ### Redux store (src/store/index.js):
 
@@ -133,7 +138,7 @@ ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
 }),
 });
 
-text
+
 
 ## 📱 Адаптивность
 
@@ -163,7 +168,7 @@ npm run build
 3. Скопировать в Django проект
 cp -r build ../MyCloudBackend/frontend_build
 
-text
+
 
 ### Интеграция с Django:
 
@@ -189,7 +194,7 @@ npm update
 rm -rf node_modules package-lock.json
 npm install
 
-text
+
 
 ### Частые проблемы:
 

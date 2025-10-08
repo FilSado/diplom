@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bullseye
+
 
 RUN apt-get update && apt-get install -y \
     postgresql-client \
@@ -15,8 +16,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN mkdir -p logs staticfiles media
-
-RUN python manage.py collectstatic --noinput
 
 RUN useradd --create-home --shell /bin/bash app \
     && chown -R app:app /app
