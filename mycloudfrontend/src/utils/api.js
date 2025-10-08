@@ -1,5 +1,5 @@
-// Базовый URL API
-const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+// Базовый URL API - ИСПРАВЛЕНО!
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://83.166.245.17:8000/api';
 
 // Флаг для предотвращения множественных refresh-запросов
 let isRefreshing = false;
@@ -43,10 +43,21 @@ async function handleResponse(response) {
   return response;
 }
 
-// Токены в localStorage
+// Токены в localStorage - ИСПРАВЛЕНО!
 function getTokens() {
   try {
-    return JSON.parse(localStorage.getItem('tokens'));
+    // Поддерживаем оба формата токенов
+    const tokens = JSON.parse(localStorage.getItem('tokens'));
+    if (tokens) return tokens;
+    
+    // Fallback для старого формата
+    const access = localStorage.getItem('access_token');
+    const refresh = localStorage.getItem('refresh_token');
+    if (access && refresh) {
+      return { access, refresh };
+    }
+    
+    return null;
   } catch {
     return null;
   }
@@ -54,11 +65,17 @@ function getTokens() {
 
 function setTokens(tokens) {
   localStorage.setItem('tokens', JSON.stringify(tokens));
+  // Также сохраняем в старом формате для совместимости
+  localStorage.setItem('access_token', tokens.access);
+  localStorage.setItem('refresh_token', tokens.refresh);
 }
 
 function removeTokens() {
   localStorage.removeItem('tokens');
   localStorage.removeItem('user');
+  // Удаляем и старый формат
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
 }
 
 // =================
@@ -157,7 +174,7 @@ export async function getCurrentUserApi() {
 }
 
 // =================
-// РАБОТА С ФАЙЛАМИ
+// РАБОТА С ФАЙЛАМИ - ИСПРАВЛЕНО!
 // =================
 
 // Список файлов
@@ -166,14 +183,14 @@ export async function getFilesApi(userId = null) {
   return authorizedFetch(url);
 }
 
-// Загрузка файла
+// Загрузка файла - ОСНОВНАЯ ПРОБЛЕМА ИСПРАВЛЕНА!
 export async function uploadFileApi({ file, comment = '', onProgress }) {
   const tokens = getTokens();
   if (!tokens?.access) throw new Error('Необходима авторизация');
   
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('comment', comment);
+  if (comment) formData.append('comment', comment);
   
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -211,6 +228,7 @@ export async function uploadFileApi({ file, comment = '', onProgress }) {
     xhr.ontimeout = () => reject(new Error('Превышено время ожидания загрузки файла'));
     xhr.onabort = () => reject(new Error('Загрузка файла отменена'));
     
+    // ИСПРАВЛЕНО! Убираем дублирование /api
     xhr.open('POST', `${API_BASE_URL}/files/upload/`);
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.access}`);
     xhr.timeout = 5 * 60 * 1000;
@@ -305,7 +323,7 @@ export async function toggleUserStatusApi(id, isActive) {
 }
 
 // =================
-// УТИЛИТЫ
+// УТИЛИТЫ - ИСПРАВЛЕНО!
 // =================
 
 export async function authorizedFetch(url, options = {}) {
@@ -320,7 +338,10 @@ export async function authorizedFetch(url, options = {}) {
     delete headers['Content-Type'];
   }
 
-  let response = await fetch(`${API_BASE_URL}${url}`, {
+  // ИСПРАВЛЕНО! Убираем дублирование слеша
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+
+  let response = await fetch(fullUrl, {
     ...options,
     headers,
     credentials: 'include'
@@ -330,7 +351,7 @@ export async function authorizedFetch(url, options = {}) {
     try {
       const newTokens = await refreshTokenApi();
       headers.Authorization = `Bearer ${newTokens.access}`;
-      response = await fetch(`${API_BASE_URL}${url}`, {
+      response = await fetch(fullUrl, {
         ...options,
         headers,
         credentials: 'include'

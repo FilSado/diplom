@@ -18,6 +18,12 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 # Allowed hosts configuration
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,83.166.245.17').split(',')
 
+if 'super-lawyer.ru' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('super-lawyer.ru')
+if '192.168.0.207' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('192.168.0.207')
+
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -219,8 +225,12 @@ if DEBUG:
 else:
     CORS_ALLOWED_ORIGINS = [
         "http://83.166.245.17",
-        "https://83.166.245.17", 
-    ]
+        "https://83.166.245.17",
+        "http://super-lawyer.ru",
+        "https://super-lawyer.ru",
+        "http://83.166.245.17:3000",
+        "http://localhost:3000",
+        ]
     CSRF_TRUSTED_ORIGINS = [
         "http://83.166.245.17",
         "https://83.166.245.17",
