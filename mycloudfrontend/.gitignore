@@ -9,6 +9,8 @@ env/
 venv/
 ENV/
 *.sqlite3
+*.zip
+
 
 # Django media and static
 media/
